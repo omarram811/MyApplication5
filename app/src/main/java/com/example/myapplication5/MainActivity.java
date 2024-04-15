@@ -50,8 +50,6 @@ import androidx.navigation.ui.NavigationUI;
 import com.example.myapplication5.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
-
-    private HomeFragment homeFragment;
     private ActivityMainBinding binding;
 
     TextView signalStrengthText;
@@ -71,8 +69,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        homeFragment = new HomeFragment(); //
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
