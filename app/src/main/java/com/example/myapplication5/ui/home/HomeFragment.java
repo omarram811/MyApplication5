@@ -33,8 +33,6 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        TextView signalStrengthText = root.findViewById(R.id.signalStrengthText);
-        signalStrengthText.setText("5G");
 
         Context context = requireContext();
 
@@ -47,6 +45,9 @@ public class HomeFragment extends Fragment {
 
         TextView networkTypeText = root.findViewById(R.id.networkTypeText);
         networkTypeText.setText(UIDataExtractor.getNetworkType(context));
+
+        TextView signalStrengthText = root.findViewById(R.id.signalStrengthText);
+        signalStrengthText.setText(UIDataExtractor.getSignalStrength(context));
 
 
         final TextView textView = binding.textHome;

@@ -80,8 +80,6 @@ public class UIDataExtractor {
         return "";
     }
 
-
-
     public static String getNetworkType(Context context) {
         TelephonyManager manager = (TelephonyManager) context.getSystemService(TelephonyManager.class);
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
@@ -110,6 +108,38 @@ public class UIDataExtractor {
                 return "Outside Scope";
         }
     }
+
+    public static String getSignalStrength(Context context) {
+        TelephonyManager manager = (TelephonyManager) context.getSystemService(TelephonyManager.class);
+        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            return "";
+        }
+        List<CellInfo> cellInfoList = manager.getAllCellInfo();
+        if (cellInfoList == null) {
+            return "";
+        }
+        for (CellInfo cellInfo : cellInfoList) {
+            if (cellInfo instanceof CellInfoGsm) {
+                CellInfoGsm cellInfoGsm = (CellInfoGsm) cellInfo;
+                CellSignalStrengthGsm cellSignalStrengthGsm = cellInfoGsm.getCellSignalStrength();
+                int signalStrength = cellSignalStrengthGsm.getDbm();
+                return signalStrength + "dBm";
+            } else if (cellInfo instanceof CellInfoWcdma) { //WCDMA = UMTS
+                CellInfoWcdma cellInfoUmts = (CellInfoWcdma) cellInfo;
+                CellSignalStrengthWcdma cellSignalStrengthUmts = cellInfoUmts.getCellSignalStrength();
+                int signalStrength = cellSignalStrengthUmts.getDbm();
+                return signalStrength + "dBm";
+            } else if (cellInfo instanceof CellInfoLte) {
+                CellInfoLte cellInfoLte = (CellInfoLte) cellInfo;
+                CellSignalStrengthLte cellSignalStrengthLte = cellInfoLte.getCellSignalStrength();
+                int signalStrength = cellSignalStrengthLte.getDbm();
+                return signalStrength + "dBm";
+            }
+        }
+        return "";
+    }
+
 
 
 
