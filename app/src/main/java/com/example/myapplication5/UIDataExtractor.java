@@ -82,4 +82,35 @@ public class UIDataExtractor {
 
 
 
+    public static String getNetworkType(Context context) {
+        TelephonyManager manager = (TelephonyManager) context.getSystemService(TelephonyManager.class);
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            return "";
+        }
+        return getNetworkType(manager.getNetworkType());
+    }
+
+    private static String getNetworkType(int networkType) {
+        switch (networkType) {
+            case TelephonyManager.NETWORK_TYPE_GSM:
+                return "GSM";
+            case TelephonyManager.NETWORK_TYPE_GPRS:
+                return "GPRS";
+            case TelephonyManager.NETWORK_TYPE_EDGE:
+                return "EDGE";
+            case TelephonyManager.NETWORK_TYPE_UMTS:
+                return "UMTS";
+            case TelephonyManager.NETWORK_TYPE_HSDPA:
+                return "HSDPA";
+            case TelephonyManager.NETWORK_TYPE_LTE:
+                return "LTE";
+            case TelephonyManager.NETWORK_TYPE_NR:
+                return "New Radio (5G)";
+            default:
+                return "Outside Scope";
+        }
+    }
+
+
+
 }
