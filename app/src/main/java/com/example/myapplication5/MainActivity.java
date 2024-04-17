@@ -368,9 +368,70 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static class SocketClientThread extends Thread {
+        private final String serverIp;
+        private final int serverPort;
+        private final String data;
+        private final Handler handler;
+        private final TextView statisticsText;
+
+        public SocketClientThread(String serverIp, int serverPort, String data, Handler handler, TextView statisticsText) {
+            this.serverIp = serverIp;
+            this.serverPort = serverPort;
+            this.data = data;
+            this.handler = handler;
+            this.statisticsText = statisticsText;
+        }
+
+        @Override
+        public void run() {
+            // Your socket client logic here
+            try {
+                Socket socket = new Socket(serverIp, serverPort);
+                OutputStream outputStream = socket.getOutputStream();
+                outputStream.write(data.getBytes());
+                outputStream.flush();
+
+                InputStream inputStream = socket.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                StringBuilder receivedData = new StringBuilder();
+                String line;
+                while ((line=reader.readLine()) != null){
+                    receivedData.append(line);
+                }
+                handler.post(() -> {
+                    statisticsText.setText(receivedData.toString());
+                });
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void sendDataToServer(){
+        String serverIp = "10.169.25.20";
+        int serverPort = 1337;
+        String data = formatData();
+        Handler handler = new Handler(Looper.getMainLooper());
+        statisticsText = findViewById(R.id.statisticsText);
+        new SocketClientThread(serverIp, serverPort, data, handler, statisticsText).start();
+    }
+    private String formatData() {
+        JSONObject jsonData = new JSONObject();
+        try {
+            jsonData.put("signal_power", signalStrengthText.getText());
+            jsonData.put("snr", snrText.getText());
+            jsonData.put("frequency_band", frequencyText.getText());
+            jsonData.put("Time", timeText.getText());
+            jsonData.put("cell_id", cellIdText.getText());
+            jsonData.put("network_type", networkTypeText.getText());
+            jsonData.put("operator", networkOperatorText.getText());
+            jsonData.put("date_1", "2024-04-14 13:30:00");
+            jsonData.put("date_2", "2024-04-16 11:00:00");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonData.toString();
     }
 
 
