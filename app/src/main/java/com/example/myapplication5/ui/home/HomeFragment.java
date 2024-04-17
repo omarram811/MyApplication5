@@ -49,6 +49,15 @@ public class HomeFragment extends Fragment {
         TextView signalStrengthText = root.findViewById(R.id.signalStrengthText);
         signalStrengthText.setText(UIDataExtractor.getSignalStrength(context));
 
+        TextView SNRText = root.findViewById(R.id.snrText);
+        SNRText.setText(UIDataExtractor.getSNR(context));
+
+        TextView DateText = root.findViewById(R.id.timeText);
+        DateText.setText(UIDataExtractor.getDate(context));
+
+        TextView FrequencyText = root.findViewById(R.id.frequencyText);
+        FrequencyText.setText(UIDataExtractor.getFrequency(context));
+
 
         final TextView textView = binding.textHome;
         homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);

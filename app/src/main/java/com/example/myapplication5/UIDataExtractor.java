@@ -140,6 +140,72 @@ public class UIDataExtractor {
         return "";
     }
 
+    public static String getSNR(Context context) {
+        TelephonyManager manager = (TelephonyManager) context.getSystemService(TelephonyManager.class);
+        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return "";
+        }
+        List<CellInfo> cellInfoList = manager.getAllCellInfo();
+        if (cellInfoList == null) {
+            return "";
+        }
+        for (CellInfo cellInfo : cellInfoList) {
+            if (cellInfo instanceof CellInfoGsm) { //not applicable for GSM
+                return "NONE";
+            } else if (cellInfo instanceof CellInfoWcdma) { //WCDMA = UMTS
+                return "NONE"; //not applicable
+            } else if (cellInfo instanceof CellInfoLte) {
+                CellInfoLte cellInfoLte = (CellInfoLte) cellInfo;
+                CellSignalStrengthLte cellSignalStrengthLte = cellInfoLte.getCellSignalStrength();
+                return String.valueOf(cellSignalStrengthLte.getRssnr());
+            }
+        }
+        return "";
+    }
+
+    public static String getDate(Context context) {
+        TelephonyManager manager = (TelephonyManager) context.getSystemService(TelephonyManager.class);
+        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return "";
+        }
+        List<CellInfo> cellInfoList = manager.getAllCellInfo();
+        if (cellInfoList == null) {
+            return "";
+        }
+        String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+        return date;
+    }
+
+    public static String getFrequency(Context context) {
+        TelephonyManager manager = (TelephonyManager) context.getSystemService(TelephonyManager.class);
+        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return "";
+        }
+        List<CellInfo> cellInfoList = manager.getAllCellInfo();
+        if (cellInfoList == null) {
+            return "";
+        }
+        for (CellInfo cellInfo : cellInfoList) {
+            if (cellInfo instanceof CellInfoGsm) { //not applicable for GSM
+                return "NONE";
+            } else if (cellInfo instanceof CellInfoWcdma) { //WCDMA = UMTS
+                CellInfoWcdma cellInfoUmts = (CellInfoWcdma) cellInfo;
+                CellIdentityWcdma cellIdentityUmts = cellInfoUmts.getCellIdentity();
+                //UARFCN stands for UTRA Absolute Radio Frequency Channel Number
+                //Frequency Band = UARFCNx0.2
+                int UARFCN = cellIdentityUmts.getUarfcn();
+                float frequencyBand = (float) (UARFCN * 0.2);
+                return (String.valueOf(frequencyBand));
+            } else if (cellInfo instanceof CellInfoLte) {
+                CellInfoLte cellInfoLte = (CellInfoLte) cellInfo;
+                CellIdentityLte cellIdentityLte = cellInfoLte.getCellIdentity();
+                int frequencyBand =  cellIdentityLte.getBandwidth();
+                return (String.valueOf(frequencyBand));
+            }
+        }
+        return "";
+    }
+
 
 
 
