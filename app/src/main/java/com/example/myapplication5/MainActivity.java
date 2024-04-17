@@ -1,5 +1,12 @@
 package com.example.myapplication5;
 
+import android.annotation.SuppressLint;
+import android.os.Looper;
+import android.util.Log;
+import android.view.View;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.PrintWriter;
 import android.os.Bundle;
 import android.Manifest;
 import android.content.ContentValues;
@@ -39,6 +46,12 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.io.DataOutputStream;
 
+import java.io.OutputStream;
+import java.io.DataInputStream;
+import java.io.InputStreamReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -46,6 +59,11 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+
+import android.os.Handler;
+import android.os.AsyncTask;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.example.myapplication5.databinding.ActivityMainBinding;
 
@@ -59,12 +77,24 @@ public class MainActivity extends AppCompatActivity {
     TextView cellIdText;
     TextView networkTypeText;
     TextView networkOperatorText;
+    TextView statisticsText;
 
     Button button;
     private static final int PERMISSION_REQUEST_CODE = 1001;
 
     protected DatabaseHelper dbHelper;
-    MyThread myThread;
+    //MyThread myThread;
+
+
+    private final Handler handler = new Handler();
+    private final Runnable sendDataRunnable = new Runnable() {
+        @Override
+        public void run() {
+            sendDataToServer();
+            handler.postDelayed(this, 10000); // Send data every 10 seconds
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,9 +124,9 @@ public class MainActivity extends AppCompatActivity {
 
         dbHelper = new DatabaseHelper(this);
 
+        statisticsText = findViewById(R.id.statisticsText);
+
         queryCellInfo();
-        myThread = new MyThread();
-        new Thread(myThread).start();
 
         Button refreshButton = findViewById(R.id.refreshButton);
         refreshButton.setOnClickListener(new View.OnClickListener() {
@@ -107,6 +137,14 @@ public class MainActivity extends AppCompatActivity {
                 refreshCellularInfo();
             }
         });
+
+        handler.post(sendDataRunnable);
+        sendDataToServer();
+    }
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        handler.removeCallbacks(sendDataRunnable);
 
     }
 
@@ -329,51 +367,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        dbHelper.close();
-        super.onDestroy();
+    public static class SocketClientThread extends Thread {
     }
 
-    private class MyThread implements Runnable{
-        private volatile String msg="";
-        Socket socket;
-        DataOutputStream dos;
-        @Override
-        public void run() {
-
-            try {
-                String data= retrieveDataFromDatabase();
-                socket = new Socket("ip address", 5678);
-                dos=new DataOutputStream(socket.getOutputStream());
-                dos.writeUTF(msg);
-                dos.close();
-                dos.flush();
-                socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        }
-        private String retrieveDataFromDatabase() {
-            StringBuilder dataBuilder = new StringBuilder();
-            // Retrieve data from SQLite database here
-            // You can use dbHelper to access the SQLite database and retrieve the data
-            // Example:
-            // SQLiteDatabase db = dbHelper.getReadableDatabase();
-            // Cursor cursor = db.rawQuery("SELECT * FROM " + CellInfoContract.CellInfoEntry.TABLE_NAME, null);
-            // Loop through the cursor and append data to dataBuilder
-
-            // Dummy data for demonstration purposes
-            dataBuilder.append("operator1,signalPower1,snr1,networkType1,frequencyBand1,cellId1,");
-            dataBuilder.append("operator2,signalPower2,snr2,networkType2,frequencyBand2,cellId2,");
-
-            return dataBuilder.toString();
-        }
-
-        public void sendMsg() {
-            new Thread(this).start();
-        }
+    private void sendDataToServer(){
     }
+
 
 }
