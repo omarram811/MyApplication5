@@ -3,6 +3,7 @@ package com.example.myapplication5;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.telephony.CellIdentityGsm;
 import android.telephony.CellIdentityLte;
 import android.telephony.CellIdentityWcdma;
@@ -27,10 +28,12 @@ import android.content.Context;
 
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -205,6 +208,39 @@ public class UIDataExtractor {
         }
         return "";
     }
+
+
+    /*public static void insertCellInfo(String operator, String signalPower, String snr, String networkType, String frequencyBand, String cellId, String timestamp) {
+        MainActivity mainActivity = new MainActivity();
+        DatabaseHelper dbHelper = mainActivity.getDbHelper();
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.beginTransaction();
+        try{
+            ContentValues values = new ContentValues();
+            values.put(CellInfoContract.CellInfoEntry.COLUMN_NAME_OPERATOR, operator);
+            values.put(CellInfoContract.CellInfoEntry.COLUMN_NAME_SIGNAL_POWER, signalPower);
+            values.put(CellInfoContract.CellInfoEntry.COLUMN_NAME_SNR, snr);
+            values.put(CellInfoContract.CellInfoEntry.COLUMN_NAME_NETWORK_TYPE, networkType);
+            values.put(CellInfoContract.CellInfoEntry.COLUMN_NAME_FREQUENCY_BAND, frequencyBand);
+            values.put(CellInfoContract.CellInfoEntry.COLUMN_NAME_CELL_ID, cellId);
+            values.put(CellInfoContract.CellInfoEntry.COLUMN_NAME_TIMESTAMP, timestamp);
+
+            long newRowId = db.insert(CellInfoContract.CellInfoEntry.TABLE_NAME, null, values);
+            if (newRowId == -1) {
+                Toast.makeText(mainActivity, "Error inserting cell info", Toast.LENGTH_SHORT).show();
+                Log.e("Insertion Error", "Error inserting cell info");
+            } else {
+                Toast.makeText(mainActivity, "Cell info inserted with row ID: " + newRowId, Toast.LENGTH_SHORT).show();
+            }
+            db.setTransactionSuccessful();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Log.e("Insertion Error", "Error inserting cell info: " + e.getMessage());
+        } finally {
+            db.endTransaction();
+        }
+    }*/
 
 
 

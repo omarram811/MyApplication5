@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     Button button;
     private static final int PERMISSION_REQUEST_CODE = 1001;
 
-    private DatabaseHelper dbHelper;
+    protected DatabaseHelper dbHelper;
     MyThread myThread;
 
     @Override
@@ -108,6 +108,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    // Method to provide access to dbHelper
+    private DatabaseHelper getDbHelper() {
+        return dbHelper;
     }
 
 

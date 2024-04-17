@@ -14,6 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.myapplication5.DatabaseHelper;
+import com.example.myapplication5.MainActivity;
 import com.example.myapplication5.R;
 import com.example.myapplication5.databinding.FragmentHomeBinding;
 
@@ -32,6 +34,7 @@ public class HomeFragment extends Fragment {
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
+
 
 
         Context context = requireContext();
@@ -57,6 +60,9 @@ public class HomeFragment extends Fragment {
 
         TextView FrequencyText = root.findViewById(R.id.frequencyText);
         FrequencyText.setText(UIDataExtractor.getFrequency(context));
+
+        //UIDataExtractor.insertCellInfo(UIDataExtractor.getOperator(context), UIDataExtractor.getSignalStrength(context), UIDataExtractor.getSNR(context), UIDataExtractor.getNetworkType(context), UIDataExtractor.getFrequency(context), UIDataExtractor.getCellID(context), UIDataExtractor.getDate(context));
+
 
 
         final TextView textView = binding.textHome;
