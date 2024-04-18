@@ -52,9 +52,11 @@ import java.io.InputStreamReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.example.myapplication5.ui.home.HomeViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -145,6 +147,13 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
+
+
+        SocketViewModel socketViewModel =
+                new ViewModelProvider(this).get(SocketViewModel.class);
+
+        // Connect to the server
+        socketViewModel.startListening("192.168.100.154", 1337);
 
         dbHelper = new DatabaseHelper(this);
 
@@ -442,7 +451,8 @@ public class MainActivity extends AppCompatActivity {
         String data = formatData();
         Handler handler = new Handler(Looper.getMainLooper());
         statisticsText = findViewById(R.id.statisticsText);
-        new SocketClientThread(serverIp, serverPort, data, handler, statisticsText).start();
+        //new SocketClientThread(serverIp, serverPort, data, handler, statisticsText).start();
+
     }
     private String formatData() {
         JSONObject jsonData = new JSONObject();
