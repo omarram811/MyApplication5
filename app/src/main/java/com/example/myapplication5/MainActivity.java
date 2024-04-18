@@ -65,6 +65,28 @@ import android.os.AsyncTask;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.io.DataInputStream;
+import java.io.InputStreamReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.concurrent.Executor;
+import android.os.Handler;
+import android.os.AsyncTask;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+
 import com.example.myapplication5.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
@@ -90,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
     private final Runnable sendDataRunnable = new Runnable() {
         @Override
         public void run() {
+            queryCellInfo();
             sendDataToServer();
             handler.postDelayed(this, 10000); // Send data every 10 seconds
         }
@@ -111,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
         networkTypeText = findViewById(R.id.networkTypeText);
         networkOperatorText = findViewById(R.id.networkOperatorText);
         networkOperatorText.setText(getOperator());
+        statisticsText = findViewById(R.id.statisticsText);
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
@@ -149,9 +173,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Method to provide access to dbHelper
-    private DatabaseHelper getDbHelper() {
-        return dbHelper;
-    }
+    //private DatabaseHelper getDbHelper() {
+        //return dbHelper;
+    //}
 
 
 
@@ -336,6 +360,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d("RefreshCellularInfo", "Cell info refreshed: " + signalStrengthText.getText().toString());
     }
 
+
     private void insertCellInfo(String operator, String signalPower, String snr, String networkType, String frequencyBand, String cellId, String timestamp) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.beginTransaction();
@@ -397,19 +422,22 @@ public class MainActivity extends AppCompatActivity {
                 String line;
                 while ((line=reader.readLine()) != null){
                     receivedData.append(line);
+                    Log.d("Received Lines", line);
                 }
                 handler.post(() -> {
                     statisticsText.setText(receivedData.toString());
                 });
+                Log.d("SnipsChips", receivedData.toString()); //Doesn't log until server closes
                 socket.close();
             } catch (IOException e) {
+                Log.d("Reached Exception!!!!!", e.getMessage());
                 e.printStackTrace();
             }
         }
     }
 
     private void sendDataToServer(){
-        String serverIp = "10.169.25.20";
+        String serverIp = "192.168.100.154";
         int serverPort = 1337;
         String data = formatData();
         Handler handler = new Handler(Looper.getMainLooper());
