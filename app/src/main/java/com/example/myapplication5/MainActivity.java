@@ -1,57 +1,26 @@
 package com.example.myapplication5;
 
-import android.annotation.SuppressLint;
-import android.os.Looper;
 import android.util.Log;
-import android.view.View;
 import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.PrintWriter;
 import android.os.Bundle;
 import android.Manifest;
-import android.content.ContentValues;
-import android.content.Context;
 import android.content.pm.PackageManager;
-import android.database.sqlite.SQLiteDatabase;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.telephony.CellIdentityGsm;
-import android.telephony.CellIdentityLte;
-import android.telephony.CellIdentityWcdma;
 import android.telephony.CellInfo;
-import android.telephony.CellInfoGsm;
-import android.telephony.CellInfoLte;
-import android.telephony.CellInfoWcdma;
-import android.telephony.CellSignalStrengthGsm;
-import android.telephony.CellSignalStrengthLte;
-import android.telephony.CellSignalStrengthWcdma;
 import android.telephony.TelephonyManager;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
-import java.io.DataOutputStream;
 
 import java.io.OutputStream;
-import java.io.DataInputStream;
 import java.io.InputStreamReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
 
 import com.example.myapplication5.ui.home.HomeViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -63,36 +32,13 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import android.os.Handler;
-import android.os.AsyncTask;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
-import java.io.OutputStream;
-import java.net.Socket;
-import java.io.DataInputStream;
-import java.io.InputStreamReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
-import android.os.Handler;
-import android.os.AsyncTask;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 
 import com.example.myapplication5.databinding.ActivityMainBinding;
@@ -102,20 +48,10 @@ public class MainActivity extends AppCompatActivity {
 
     private HomeViewModel homeViewModel;
 
-    TextView signalStrengthText;
-    TextView snrText;
-    TextView frequencyText;
-    TextView timeText;
-    TextView cellIdText;
-    TextView networkTypeText;
-    TextView networkOperatorText;
     TextView statisticsText;
 
     Button button;
     private static final int PERMISSION_REQUEST_CODE = 1001;
-
-    protected DatabaseHelper dbHelper;
-
 
     private final Runnable sendDataRunnable = new Runnable() {
         @Override
@@ -169,14 +105,6 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        signalStrengthText = findViewById(R.id.signalStrengthText);
-        snrText = findViewById(R.id.snrText);
-        frequencyText = findViewById(R.id.frequencyText);
-        timeText = findViewById(R.id.timeText);
-        cellIdText = findViewById(R.id.cellIdText);
-        networkTypeText = findViewById(R.id.networkTypeText);
-        networkOperatorText = findViewById(R.id.networkOperatorText);
-        networkOperatorText.setText(getOperator());
         statisticsText = findViewById(R.id.statisticsText);
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
@@ -191,11 +119,6 @@ public class MainActivity extends AppCompatActivity {
 
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
-        dbHelper = new DatabaseHelper(this);
-
-        statisticsText = findViewById(R.id.statisticsText);
-
-
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         //Schedule the task to run every 10 sec
         ScheduledFuture<?> scheduledFuture = scheduler.scheduleAtFixedRate(
@@ -208,8 +131,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //handler.removeCallbacks(sendDataRunnable);
-
     }
 
     private boolean checkPermission() {
@@ -225,11 +146,6 @@ public class MainActivity extends AppCompatActivity {
                 PERMISSION_REQUEST_CODE);
     }
 
-    public String getOperator() {
-        TelephonyManager manager = (TelephonyManager) getSystemService(TelephonyManager.class);
-        return Objects.requireNonNull(manager.getNetworkOperatorName());
-    }
-
     private String formatData() {
         JSONObject jsonData = new JSONObject();
         try {
@@ -243,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
             jsonData.put("date_1", "2024-04-14 13:30:00");
             jsonData.put("date_2", "2024-04-16 11:00:00");
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e("FormatData",  e.getMessage());
         }
         return jsonData.toString();
     }
