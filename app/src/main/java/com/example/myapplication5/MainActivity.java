@@ -15,12 +15,14 @@ import androidx.core.app.ActivityCompat;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Executor;
 
 import java.io.OutputStream;
 import java.io.InputStreamReader;
 
+import com.example.myapplication5.ui.dashboard.DashboardViewModel;
 import com.example.myapplication5.ui.home.HomeViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -46,6 +48,9 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
 
     private HomeViewModel homeViewModel;
+    private DashboardViewModel dashboardViewModel;
+
+    String[] mandatoryKeys = {"average_connectivity_time_per_operator", "average_connectivity_time_per_network_type", "average_signal_power_per_network_type", "average_snr_per_network_type", "average_signal_power_per_device"};
 
     TextView statisticsText;
 
@@ -70,8 +75,10 @@ public class MainActivity extends AppCompatActivity {
 
                 BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 String receivedData = reader.readLine();
-
                 Log.d("SocketTask", "Json data: " + receivedData);
+
+                JSONObject response = parseAndValidateJson(receivedData, mandatoryKeys);
+                displayData(response);
 
                 reader.close();
                 socket.close();
@@ -118,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(binding.navView, navController);
 
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        dashboardViewModel = new ViewModelProvider(this).get(DashboardViewModel.class);
 
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         //Schedule the task to run every 10 sec
@@ -156,11 +164,65 @@ public class MainActivity extends AppCompatActivity {
             jsonData.put("cell_id", homeViewModel.getCellId().getValue());
             jsonData.put("network_type", homeViewModel.getNetworkType().getValue());
             jsonData.put("operator", homeViewModel.getNetworkOperator().getValue());
-            jsonData.put("date_1", "2024-04-14 13:30:00");
-            jsonData.put("date_2", "2024-04-16 11:00:00");
+            jsonData.put("date_1", dashboardViewModel.getStartDate().getValue());
+            jsonData.put("date_2", dashboardViewModel.getEndDate().getValue());
         } catch (JSONException e) {
             Log.e("FormatData",  e.getMessage());
         }
         return jsonData.toString();
     }
+
+    private JSONObject parseAndValidateJson(String jsonString, String... mandatoryKeys) {
+        JSONObject jsonObject = null;
+
+        try {
+            jsonObject = new JSONObject(jsonString);
+
+            // Validate mandatory keys
+            for (String key : mandatoryKeys) {
+                if (!jsonObject.has(key)) {
+                    return null;
+                }
+            }
+        } catch (JSONException e) {
+            Log.e("parseAndValidateJson", e.getMessage());
+        }
+
+        return jsonObject;
+    }
+
+    private void displayData(JSONObject jsonObject) {
+        if(jsonObject==null){
+            return;
+        }
+        try {
+            dashboardViewModel.postAvgConnOperator(prettyJson(jsonObject.getString("average_connectivity_time_per_operator")));
+            dashboardViewModel.postAvgConnNetwork(prettyJson(jsonObject.getString("average_connectivity_time_per_network_type")));
+            dashboardViewModel.postAvgSigPowType(prettyJson(jsonObject.getString("average_signal_power_per_network_type")));
+            dashboardViewModel.postAvgSNRType(prettyJson(jsonObject.getString("average_snr_per_network_type")));
+            dashboardViewModel.postAvgSigPowDevice(prettyJson(jsonObject.getString("average_signal_power_per_device")));
+        } catch (JSONException e) {
+            Log.e("FormatData", e.getMessage());
+        }
+    }
+
+    private String prettyJson(String jsonString) {
+        StringBuilder formattedString = new StringBuilder();
+        try {
+            JSONObject jsonObject = new JSONObject(jsonString);
+            Iterator<String> keys = jsonObject.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                String value = jsonObject.getString(key);
+                formattedString.append(key).append(": ").append(value);
+                if (keys.hasNext()) {
+                    formattedString.append(", ");
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return formattedString.toString();
+    }
+
 }

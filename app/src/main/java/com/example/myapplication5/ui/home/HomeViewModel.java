@@ -18,9 +18,7 @@ public class HomeViewModel extends ViewModel {
     private final MutableLiveData<String> mTime = new MutableLiveData<>();
     private final MutableLiveData<String> mFrequency = new MutableLiveData<>();
 
-    public LiveData<String> getNetworkOperator() {
-        return mNetworkOperator;
-    }
+    public LiveData<String> getNetworkOperator() { return mNetworkOperator; }
     public void setNetworkOperator(String networkOperator) {mNetworkOperator.setValue(networkOperator);}
     public LiveData<String> getCellId() {
         return mCellId;

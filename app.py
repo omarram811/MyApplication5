@@ -42,10 +42,12 @@ def parse_and_validate_json(json_string, mandatory_fields):
   try:
     data = json.loads(json_string)
   except json.JSONDecodeError:
+    logger.error("Error: Invalid Json")
     return None
 
   for field in mandatory_fields:
     if field not in data:
+      logger.error("Error: missing field="+field)
       return None
 
   return data
@@ -64,17 +66,17 @@ def index():
 def handle_client(client_socket):
     while True:
         data = client_socket.recv(1024).decode()
-        logger.debug('----- 1 data received ---')
         if not data:
             client_socket.send("\n".encode())
             break
 
 
-        data_dict = parse_and_validate_json(data, ['operator', 'signal_power', 'snr', 'network_type', 'frequency_band', 'cell_id', 'date_1', 'date_2'])
+        data_dict = parse_and_validate_json(data, ['operator', 'signal_power', 'snr', 'network_type', 'frequency_band', 'cell_id'])
         if not data_dict:
             client_socket.send("\n".encode())
             break
-            
+        
+        logger.debug('----- 1 data received ---')        
         operator = data_dict.get('operator')
         signal_power = data_dict.get('signal_power')
         snr = safe_string_to_int(data_dict.get('snr'),0)
@@ -106,8 +108,12 @@ def handle_client(client_socket):
 
 def calculate_statistics(start_date, end_date):
     with app.app_context():
+        start_date = datetime.strptime(start_date, "%y-%m-%d %H:%M")
+        end_date = datetime.strptime(end_date, "%y-%m-%d %H:%M")
         data = NetworkData.query.filter(NetworkData.date_created.between(start_date, end_date)).all()
-
+        
+        logger.debug("calculate_statistics: %s", data)
+        
         # Calculate statistics
         statistics = {}
 
@@ -151,8 +157,9 @@ def calculate_statistics(start_date, end_date):
             network_type = item.network_type
             count = network_type_counts.get(network_type, 0)
             network_type_counts[network_type] = count + 1
-
-            signal_power = int(item.signal_power)
+            
+            signal_power = item.signal_power.split('dBm')[0]
+            signal_power = safe_string_to_int(signal_power,0)
             power_sum = signal_power_sums.get(network_type, 0)
             signal_power_sums[network_type] = power_sum + signal_power
 
@@ -188,7 +195,9 @@ def calculate_statistics(start_date, end_date):
         # Average Signal power per device
         device_signal_power = {}
         for item in data:
-            device_signal_power[item.cell_id] = device_signal_power.get(item.cell_id, []) + [int(item.signal_power)]
+            signal_power = item.signal_power.split('dBm')[0]
+            signal_power = safe_string_to_int(signal_power,0)
+            device_signal_power[item.cell_id] = device_signal_power.get(item.cell_id, []) + [signal_power]
         device_average_signal_power = {cell_id: sum(powers) / len(powers) for cell_id, powers in device_signal_power.items()}
         statistics['average_signal_power_per_device'] = device_average_signal_power
         return statistics

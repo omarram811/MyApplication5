@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.app.DatePickerDialog;
@@ -22,32 +23,33 @@ import com.example.myapplication5.databinding.FragmentDashboardBinding;
 
 public class DashboardFragment extends Fragment {
 
-    private TextView textStartView;
-    private TextView textEndView;
-    private Button buttonStart;
-    private Button buttonEnd;
     private FragmentDashboardBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         DashboardViewModel dashboardViewModel =
-                new ViewModelProvider(this).get(DashboardViewModel.class);
+                new ViewModelProvider(requireActivity()).get(DashboardViewModel.class);
 
         binding = FragmentDashboardBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        textStartView = root.findViewById(R.id.textStart);
-        textEndView = root.findViewById(R.id.textEnd);
-        buttonStart = root.findViewById(R.id.buttonStart);
-        buttonEnd = root.findViewById(R.id.buttonEnd);
+        dashboardViewModel.getAvgConnOperator().observe(getViewLifecycleOwner(), binding.AvgConnOperatorText::setText);
+        dashboardViewModel.getAvgConnNetwork().observe(getViewLifecycleOwner(), binding.AvgConnNetworkText::setText);
+        dashboardViewModel.getAvgSigPowType().observe(getViewLifecycleOwner(), binding.AvgSigPowTypeText::setText);
+        dashboardViewModel.getAvgSigPowDevice().observe(getViewLifecycleOwner(), binding.AvgSigPowDeviceText::setText);
+        dashboardViewModel.getAvgSNRType().observe(getViewLifecycleOwner(), binding.AvgSNRTypeText::setText);
+        dashboardViewModel.getStartDate().observe(getViewLifecycleOwner(), binding.textStart::setText);
+        dashboardViewModel.getEndDate().observe(getViewLifecycleOwner(), binding.textEnd::setText);
 
+
+        Button buttonStart = root.findViewById(R.id.buttonStart);
         buttonStart.setOnClickListener(view -> {
-
-            showDateTimeDialog(textStartView);
+            showDateTimeDialog(dashboardViewModel.getStartDate());
         });
 
+        Button buttonEnd = root.findViewById(R.id.buttonEnd);
         buttonEnd.setOnClickListener(view -> {
-            showDateTimeDialog(textEndView);
+            showDateTimeDialog(dashboardViewModel.getEndDate());
         });
 
         final TextView textView = binding.textDashboard;
@@ -55,7 +57,7 @@ public class DashboardFragment extends Fragment {
         return root;
     }
 
-    private void showDateTimeDialog(final TextView textView) {
+    private void showDateTimeDialog(final MutableLiveData<String> mData) {
         final Calendar calendar=Calendar.getInstance();
         DatePickerDialog.OnDateSetListener dateSetListener= (view, year, month, dayOfMonth) -> {
             calendar.set(Calendar.YEAR,year);
@@ -68,7 +70,7 @@ public class DashboardFragment extends Fragment {
 
                 SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yy-MM-dd HH:mm");
 
-                textView.setText(simpleDateFormat.format(calendar.getTime()));
+                mData.setValue(simpleDateFormat.format(calendar.getTime()));
             };
 
             new TimePickerDialog(requireContext(),timeSetListener,calendar.get(Calendar.HOUR_OF_DAY),calendar.get(Calendar.MINUTE),false).show();
