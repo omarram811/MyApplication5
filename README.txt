@@ -27,3 +27,6 @@ python
 >>> from app import db
 >>> db.create_all()
 
+
+10.0.2.2 is used to access local machine development host from android emulator
+https://developer.android.com/studio/run/emulator-networking.html

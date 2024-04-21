@@ -6,6 +6,19 @@ import threading
 import json
 import os
 
+import logging
+
+# Set up logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+# Define formatter
+formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+
+# Create console handler
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
+
 app = Flask(__name__)
 db_file_path = os.path.join(app.root_path, 'test.db')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_file_path
@@ -24,6 +37,12 @@ class NetworkData(db.Model):
 
     def __repr__(self):
         return self.cell_id
+        
+def safe_string_to_int(s, default=None):
+    try:
+        return int(s)
+    except ValueError:
+        return default
 
 @app.route('/')
 def index():
@@ -32,7 +51,7 @@ def index():
 def handle_client(client_socket):
     while True:
         data = client_socket.recv(1024).decode()
-        print('----- 1 data received ---')
+        logger.debug('----- 1 data received ---')
         if not data:
             break
 
@@ -41,30 +60,30 @@ def handle_client(client_socket):
 
             operator = data_dict.get('operator')
             signal_power = data_dict.get('signal_power')
-            snr = int(data_dict.get('snr'))
+            snr = safe_string_to_int(data_dict.get('snr'),0)
             network_type = data_dict.get('network_type')
             frequency_band = data_dict.get('frequency_band')
             cell_id = data_dict.get('cell_id')
             date1 = data_dict.get('date_1')
             date2 = data_dict.get('date_2')
-            print('----- 2 decoded successfully -----')
+            logger.debug('----- 2 decoded successfully -----')
             new_network_data = NetworkData(operator=operator, signal_power=signal_power, snr=snr, network_type=network_type, frequency_band=frequency_band, cell_id=cell_id)
             with app.app_context():
                 db.session.add(new_network_data)
-                print('----- 3 added successfully -----')
+                logger.debug('----- 3 added successfully -----')
                 db.session.commit()
-                print('----- 4 commited successfully -----')
+                logger.debug('----- 4 commited successfully -----')
             if date1!=None and date2!=None:
                 statistics = calculate_statistics(date1, date2)
                 statistics_json = json.dumps(statistics)
-                client_socket.send(statistics_json.encode())
-                print("----- 5 Sent Statistics ----")
+                client_socket.send(statistics_json.encode()+"\n".encode())
+                logger.debug("----- 5 Sent Statistics ----")
         except json.JSONDecodeError:
-            print("Error: Invalid Data")
+            logger.error("Error: Invalid Data")
 
         client_socket.send("Received".encode())
 
-    print("Closing Connection")
+    logger.info("Closing Connection")
     client_socket.close()
 
 
@@ -166,7 +185,7 @@ def socket_server():
         client_socket, addr = server_socket.accept()
         client_thread = threading.Thread(target=handle_client, args=(client_socket,))
         client_thread.start()
-        print("connected client")
+        logger.info("connected client")
 
 if __name__ == "__main__":
     server_thread = threading.Thread(target=socket_server)
