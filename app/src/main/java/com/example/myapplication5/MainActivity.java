@@ -16,7 +16,6 @@ import androidx.core.app.ActivityCompat;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Executor;
 
 import java.io.OutputStream;
