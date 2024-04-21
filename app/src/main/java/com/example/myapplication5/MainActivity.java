@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
 
             try {
                 Socket socket = new Socket(ipAddress, port);
+                socket.setSoTimeout(500);
                 Log.i("SocketTask", "connected to socket");
                 OutputStream outputStream = socket.getOutputStream();
                 Log.i("SocketTask", "Data to send: " + dataToSend);
@@ -149,13 +150,13 @@ public class MainActivity extends AppCompatActivity {
     private String formatData() {
         JSONObject jsonData = new JSONObject();
         try {
-            jsonData.put("signal_power", homeViewModel.getSignalStrength());
-            jsonData.put("snr", homeViewModel.getSnr());
-            jsonData.put("frequency_band", homeViewModel.getFrequency());
-            jsonData.put("Time", homeViewModel.getTime());
-            jsonData.put("cell_id", homeViewModel.getCellId());
-            jsonData.put("network_type", homeViewModel.getNetworkType());
-            jsonData.put("operator", homeViewModel.getNetworkOperator());
+            jsonData.put("signal_power", homeViewModel.getSignalStrength().getValue());
+            jsonData.put("snr", homeViewModel.getSnr().getValue());
+            jsonData.put("frequency_band", homeViewModel.getFrequency().getValue());
+            jsonData.put("Time", homeViewModel.getTime().getValue());
+            jsonData.put("cell_id", homeViewModel.getCellId().getValue());
+            jsonData.put("network_type", homeViewModel.getNetworkType().getValue());
+            jsonData.put("operator", homeViewModel.getNetworkOperator().getValue());
             jsonData.put("date_1", "2024-04-14 13:30:00");
             jsonData.put("date_2", "2024-04-16 11:00:00");
         } catch (JSONException e) {

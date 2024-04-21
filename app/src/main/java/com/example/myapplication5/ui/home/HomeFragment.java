@@ -1,6 +1,7 @@
 package com.example.myapplication5.ui.home;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,40 +17,34 @@ import com.example.myapplication5.databinding.FragmentHomeBinding;
 public class HomeFragment extends Fragment {
 
     private FragmentHomeBinding binding;
+    private HomeViewModel homeViewModel;
+
+    private final Handler handler = new Handler();
+    private final Runnable fieldsAutoRefresh = new Runnable() {
+        @Override
+        public void run() {
+            homeViewModel.updateAll(requireContext());
+            handler.postDelayed(this, 10000);
+        }
+    };
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        HomeViewModel homeViewModel =
+        homeViewModel =
                 new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        homeViewModel.updateAll(requireContext());
+        homeViewModel.getNetworkOperator().observe(getViewLifecycleOwner(), binding.networkOperatorText::setText);
+        homeViewModel.getCellId().observe(getViewLifecycleOwner(), binding.cellIdText::setText);
+        homeViewModel.getNetworkType().observe(getViewLifecycleOwner(), binding.networkTypeText::setText);
+        homeViewModel.getSignalStrength().observe(getViewLifecycleOwner(), binding.signalStrengthText::setText);
+        homeViewModel.getSnr().observe(getViewLifecycleOwner(), binding.snrText::setText);
+        homeViewModel.getTime().observe(getViewLifecycleOwner(), binding.timeText::setText);
+        homeViewModel.getFrequency().observe(getViewLifecycleOwner(), binding.frequencyText::setText);
 
-        TextView networkOperatorText = root.findViewById(R.id.networkOperatorText);
-        networkOperatorText.setText(homeViewModel.getNetworkOperator());
-
-        TextView cellIdText = root.findViewById(R.id.cellIdText);
-        cellIdText.setText(homeViewModel.getCellId());
-
-        TextView networkTypeText = root.findViewById(R.id.networkTypeText);
-        networkTypeText.setText(homeViewModel.getNetworkType());
-
-        TextView signalStrengthText = root.findViewById(R.id.signalStrengthText);
-        signalStrengthText.setText(homeViewModel.getSignalStrength());
-
-        TextView SNRText = root.findViewById(R.id.snrText);
-        SNRText.setText(homeViewModel.getSnr());
-
-        TextView DateText = root.findViewById(R.id.timeText);
-        DateText.setText(homeViewModel.getTime());
-
-        TextView FrequencyText = root.findViewById(R.id.frequencyText);
-        FrequencyText.setText(homeViewModel.getFrequency());
-
-        final TextView textView = binding.textHome;
-        homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        handler.post(fieldsAutoRefresh);
         return root;
     }
 
@@ -59,5 +54,6 @@ public class HomeFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+        handler.removeCallbacks(fieldsAutoRefresh);
     }
 }

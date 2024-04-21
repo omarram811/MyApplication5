@@ -25,32 +25,32 @@ public class HomeViewModel extends ViewModel {
         mText.setValue("This is home fragment");
     }
 
-    public String getNetworkOperator() {
-        return mNetworkOperator.getValue();
+    public MutableLiveData<String> getNetworkOperator() {
+        return mNetworkOperator;
     }
     public void setNetworkOperator(String networkOperator) {mNetworkOperator.setValue(networkOperator);}
-    public String getCellId() {
-        return mCellId.getValue();
+    public MutableLiveData<String> getCellId() {
+        return mCellId;
     }
     public void setCellId(String cellId) {mCellId.setValue(cellId);}
-    public String getNetworkType() {
-        return mNetworkType.getValue();
+    public MutableLiveData<String> getNetworkType() {
+        return mNetworkType;
     }
     public void setNetworkType(String networkType) {mNetworkType.setValue(networkType);}
-    public String getSignalStrength() {
-        return mSignalStrength.getValue();
+    public MutableLiveData<String> getSignalStrength() {
+        return mSignalStrength;
     }
     public void setSignalStrength(String signalStrength) {mSignalStrength.setValue(signalStrength);}
-    public String getSnr() {
-        return mSnr.getValue();
+    public MutableLiveData<String> getSnr() {
+        return mSnr;
     }
     public void setSnr(String snr) {mSnr.setValue(snr);}
-    public String getTime() {
-        return mTime.getValue();
+    public MutableLiveData<String> getTime() {
+        return mTime;
     }
     public void setTime(String time) {mTime.setValue(time);}
-    public String getFrequency() {
-        return mFrequency.getValue();
+    public MutableLiveData<String> getFrequency() {
+        return mFrequency;
     }
     public void setFrequency(String frequency) {
         mFrequency.setValue(frequency);

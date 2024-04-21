@@ -38,11 +38,24 @@ class NetworkData(db.Model):
     def __repr__(self):
         return self.cell_id
         
+def parse_and_validate_json(json_string, mandatory_fields):
+  try:
+    data = json.loads(json_string)
+  except json.JSONDecodeError:
+    return None
+
+  for field in mandatory_fields:
+    if field not in data:
+      return None
+
+  return data
+ 
+ 
 def safe_string_to_int(s, default=None):
-    try:
-        return int(s)
-    except ValueError:
-        return default
+  try:
+    return int(s)
+  except ValueError:
+    return default
 
 @app.route('/')
 def index():
@@ -53,35 +66,39 @@ def handle_client(client_socket):
         data = client_socket.recv(1024).decode()
         logger.debug('----- 1 data received ---')
         if not data:
+            client_socket.send("\n".encode())
             break
 
-        try:
-            data_dict = json.loads(data)
 
-            operator = data_dict.get('operator')
-            signal_power = data_dict.get('signal_power')
-            snr = safe_string_to_int(data_dict.get('snr'),0)
-            network_type = data_dict.get('network_type')
-            frequency_band = data_dict.get('frequency_band')
-            cell_id = data_dict.get('cell_id')
-            date1 = data_dict.get('date_1')
-            date2 = data_dict.get('date_2')
-            logger.debug('----- 2 decoded successfully -----')
-            new_network_data = NetworkData(operator=operator, signal_power=signal_power, snr=snr, network_type=network_type, frequency_band=frequency_band, cell_id=cell_id)
-            with app.app_context():
-                db.session.add(new_network_data)
-                logger.debug('----- 3 added successfully -----')
-                db.session.commit()
-                logger.debug('----- 4 commited successfully -----')
-            if date1!=None and date2!=None:
-                statistics = calculate_statistics(date1, date2)
-                statistics_json = json.dumps(statistics)
-                client_socket.send(statistics_json.encode()+"\n".encode())
-                logger.debug("----- 5 Sent Statistics ----")
-        except json.JSONDecodeError:
-            logger.error("Error: Invalid Data")
+        data_dict = parse_and_validate_json(data, ['operator', 'signal_power', 'snr', 'network_type', 'frequency_band', 'cell_id', 'date_1', 'date_2'])
+        if not data_dict:
+            client_socket.send("\n".encode())
+            break
+            
+        operator = data_dict.get('operator')
+        signal_power = data_dict.get('signal_power')
+        snr = safe_string_to_int(data_dict.get('snr'),0)
+        network_type = data_dict.get('network_type')
+        frequency_band = data_dict.get('frequency_band')
+        cell_id = data_dict.get('cell_id')
+        date1 = data_dict.get('date_1')
+        date2 = data_dict.get('date_2')
+        logger.debug('----- 2 decoded successfully -----')
+        new_network_data = NetworkData(operator=operator, signal_power=signal_power, snr=snr, network_type=network_type, frequency_band=frequency_band, cell_id=cell_id)
+        with app.app_context():
+            db.session.add(new_network_data)
+            logger.debug('----- 3 added successfully -----')
+            db.session.commit()
+            logger.debug('----- 4 commited successfully -----')
+            
+        if date1 and date2:
+            statistics = calculate_statistics(date1, date2)
+            statistics_json = json.dumps(statistics)
+            client_socket.send(statistics_json.encode())
+            logger.debug("----- 5 Sent Statistics ----")
 
-        client_socket.send("Received".encode())
+        client_socket.send("\n".encode())
+
 
     logger.info("Closing Connection")
     client_socket.close()
