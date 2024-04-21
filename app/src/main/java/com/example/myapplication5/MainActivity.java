@@ -53,9 +53,11 @@ import java.io.InputStreamReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.example.myapplication5.ui.home.HomeViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -97,6 +99,8 @@ import com.example.myapplication5.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
+
+    private HomeViewModel homeViewModel;
 
     TextView signalStrengthText;
     TextView snrText;
@@ -185,9 +189,12 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+
         dbHelper = new DatabaseHelper(this);
 
         statisticsText = findViewById(R.id.statisticsText);
+
 
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         //Schedule the task to run every 10 sec
@@ -226,13 +233,13 @@ public class MainActivity extends AppCompatActivity {
     private String formatData() {
         JSONObject jsonData = new JSONObject();
         try {
-            jsonData.put("signal_power", signalStrengthText.getText());
-            jsonData.put("snr", snrText.getText());
-            jsonData.put("frequency_band", frequencyText.getText());
-            jsonData.put("Time", timeText.getText());
-            jsonData.put("cell_id", cellIdText.getText());
-            jsonData.put("network_type", networkTypeText.getText());
-            jsonData.put("operator", networkOperatorText.getText());
+            jsonData.put("signal_power", homeViewModel.getSignalStrength());
+            jsonData.put("snr", homeViewModel.getSnr());
+            jsonData.put("frequency_band", homeViewModel.getFrequency());
+            jsonData.put("Time", homeViewModel.getTime());
+            jsonData.put("cell_id", homeViewModel.getCellId());
+            jsonData.put("network_type", homeViewModel.getNetworkType());
+            jsonData.put("operator", homeViewModel.getNetworkOperator());
             jsonData.put("date_1", "2024-04-14 13:30:00");
             jsonData.put("date_2", "2024-04-16 11:00:00");
         } catch (JSONException e) {
