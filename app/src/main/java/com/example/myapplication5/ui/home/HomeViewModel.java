@@ -10,7 +10,6 @@ import com.example.myapplication5.UIDataExtractor;
 
 public class HomeViewModel extends ViewModel {
 
-    private final MutableLiveData<String> mText;
     private final MutableLiveData<String> mNetworkOperator = new MutableLiveData<>();
     private final MutableLiveData<String> mCellId = new MutableLiveData<>();
     private final MutableLiveData<String> mNetworkType = new MutableLiveData<>();
@@ -19,25 +18,19 @@ public class HomeViewModel extends ViewModel {
     private final MutableLiveData<String> mTime = new MutableLiveData<>();
     private final MutableLiveData<String> mFrequency = new MutableLiveData<>();
 
-
-    public HomeViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("This is home fragment");
-    }
-
-    public MutableLiveData<String> getNetworkOperator() {
+    public LiveData<String> getNetworkOperator() {
         return mNetworkOperator;
     }
     public void setNetworkOperator(String networkOperator) {mNetworkOperator.setValue(networkOperator);}
-    public MutableLiveData<String> getCellId() {
+    public LiveData<String> getCellId() {
         return mCellId;
     }
     public void setCellId(String cellId) {mCellId.setValue(cellId);}
-    public MutableLiveData<String> getNetworkType() {
+    public LiveData<String> getNetworkType() {
         return mNetworkType;
     }
     public void setNetworkType(String networkType) {mNetworkType.setValue(networkType);}
-    public MutableLiveData<String> getSignalStrength() {
+    public LiveData<String> getSignalStrength() {
         return mSignalStrength;
     }
     public void setSignalStrength(String signalStrength) {mSignalStrength.setValue(signalStrength);}
@@ -45,11 +38,11 @@ public class HomeViewModel extends ViewModel {
         return mSnr;
     }
     public void setSnr(String snr) {mSnr.setValue(snr);}
-    public MutableLiveData<String> getTime() {
+    public LiveData<String> getTime() {
         return mTime;
     }
     public void setTime(String time) {mTime.setValue(time);}
-    public MutableLiveData<String> getFrequency() {
+    public LiveData<String> getFrequency() {
         return mFrequency;
     }
     public void setFrequency(String frequency) {
@@ -65,9 +58,4 @@ public class HomeViewModel extends ViewModel {
         setTime(UIDataExtractor.getDate(context));
         setFrequency(UIDataExtractor.getFrequency(context));
     }
-
-    public LiveData<String> getText() {
-        return mText;
-    }
-
 }
